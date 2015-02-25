@@ -1,0 +1,186 @@
+/*
+ * ntpserial_main.c
+ *
+ *  Created on: 19 Oct 2014
+ *      Author: bapanna
+ */
+
+/*
+ * Serial code source: http://stackoverflow.com/a/6947758
+ * NTP code source: http://www.abnormal.com/~thogard/ntp/
+ */
+
+//serial communication includes
+#include "termios.h"
+#include "unistd.h"
+#include "errno.h"
+#include "fcntl.h"
+#include "string.h"
+#include "stdio.h"
+#include "time.h"
+
+void clearbuffer(char buffer[], int length)
+{
+	int i;
+
+	for (i=0; i<length; i++)
+	{
+		buffer[i] = 'x';
+	}
+}
+
+int configure_interface(int reader, int baud_rate, int parity)
+{
+	struct termios tty_connection_attributes;
+
+	//sets struct to 0s
+	memset(&tty_connection_attributes, 0, sizeof(tty_connection_attributes));
+	if (tcgetattr (reader, &tty_connection_attributes) != 0)
+	{
+		printf("error %d from tcgetattr\n", errno);
+		return -1;
+	}
+
+//	cfsetospeed is redundant as no output operations are carried out
+//	setting output speed anyway JIC
+	cfsetospeed(&tty_connection_attributes, baud_rate);
+	cfsetispeed(&tty_connection_attributes, baud_rate);
+
+//	the following code has been copied and pasted directly from the serial
+//	example code, with adjustments made for variable names and minor formatting
+
+	tty_connection_attributes.c_cflag = (tty_connection_attributes.c_cflag & ~CSIZE) | CS8;		// 8-bit chars
+	// disable IGNBRK for mismatched speed tests; otherwise receive break
+	// as \000 chars
+	tty_connection_attributes.c_iflag &= ~IGNBRK;		// disable break processing
+	tty_connection_attributes.c_lflag = 0;				// no signaling chars, no echo,
+														// no canonical processing
+	tty_connection_attributes.c_oflag = 0;				// no remapping, no delays
+	tty_connection_attributes.c_cc[VMIN]  = 0;			// read doesn't block
+	tty_connection_attributes.c_cc[VTIME] = 5;			// 0.5 seconds read timeout
+
+	tty_connection_attributes.c_iflag &= ~(IXON | IXOFF | IXANY);	// shut off xon/xoff ctrl
+
+	tty_connection_attributes.c_cflag |= (CLOCAL | CREAD);// ignore modem controls,
+									// enable reading
+	tty_connection_attributes.c_cflag &= ~(PARENB | PARODD);		// shut off parity
+	tty_connection_attributes.c_cflag |= parity;
+	tty_connection_attributes.c_cflag &= ~CSTOPB;
+	tty_connection_attributes.c_cflag &= ~CRTSCTS;
+
+	if (tcsetattr (reader, TCSANOW, &tty_connection_attributes) != 0)
+	{
+		printf ("error %d from tcsetattr\n", errno);
+		return -1;
+	}
+
+	return 0;
+}
+
+int configure_blocking(int reader, int should_block)
+{
+	struct termios tty_connection_attributes;
+	memset(&tty_connection_attributes, 0, sizeof(tty_connection_attributes));
+	if (tcgetattr(reader, &tty_connection_attributes) != 0)
+	{
+		printf("error %d from tcsetattr\n", errno);
+		return -1;
+	}
+
+//	the following code has been copied and pasted directly from the serial
+//	example code, with adjustments made for variable names and minor formatting
+
+	tty_connection_attributes.c_cc[VMIN]  = should_block ? 1 : 0;
+	tty_connection_attributes.c_cc[VTIME] = 50;	// 0.5 seconds read timeout
+	/*
+	 * the value of c_cc[VTIME] has been changed from 5 to 50 (5 seconds) to
+	 * stop the read function from timing out and printing new lines (solution
+	 * used in conjunction with second buffer)
+	 */
+
+
+	if(tcsetattr(reader, TCSANOW, &tty_connection_attributes) != 0)
+	{
+		printf("error %d setting term attributes\n", errno);
+	}
+
+	return 0;
+}
+
+int main(int argc, char *argv[])
+{
+	int length = 7; //length must be 7 to accommodate the space character sent
+	int i = 0;
+	long ms;
+
+	char *portname = "/dev/ttyUSB0";
+	char buffer[length];
+	char data[length];
+	char filename[10];	// name of file to be written to <added for radio map creation>
+
+	FILE *ukp;	// reader with ID 1ukpxx
+	FILE *ukh;	// reader with ID 1ukhxx
+	struct timespec current_time;	//struct used for time
+
+	//open reader with read/write permissions, not controlling entity and
+	//synchronous communications
+	//-------------CHECK IF WORKS---------------
+	int reader = open(portname, O_RDWR|O_NOCTTY|O_SYNC);
+
+	if (reader < 0)
+	{
+		printf("error %d opening %s: %s\n", errno, portname, strerror(errno));
+		return 0;
+	}
+
+	configure_interface(reader, B9600, 1);
+	configure_blocking(reader, 0);
+
+	clearbuffer(buffer, length);
+	
+	strncpy(filename, argv[1], 3);	// format output file's name
+	strncat(filename, ".txt", 4);	// added for radio map creation
+
+	while(1)
+	{
+		for (i=0; i<length; i++)
+		{
+			read(reader, buffer, length);
+			data[i] = buffer[0];
+		}
+
+		clock_gettime(CLOCK_REALTIME, &current_time);
+		ms = (current_time.tv_sec*1000)+(current_time.tv_nsec/1000000); //# of ms from epoch
+
+		printf("%s", data);
+		printf("%ld\n", ms);
+
+		if (data[3] == 'p')
+		{
+			ukp = fopen(filename, "a");
+			fprintf(ukp, "%s", data);
+			fprintf(ukp, "%ld\n", ms);
+			fclose(ukp);
+		}
+
+		else if (data[3] == 'h')
+		{
+			ukh = fopen(filename, "a");
+			fprintf(ukh, "%s", data);
+			fprintf(ukh, "%ld\n", ms);
+			fclose(ukh);
+		}
+
+		clearbuffer(buffer, length);
+
+		/*
+		 * did not use usleep() as a way of getting datagrams every 2.5s as the
+		 * reader's transmit time is not a constant interval, and any offset
+		 * between the program starting and the transmit interval would result
+		 * in incorrect data capture
+		 */
+	}
+
+	return 0;
+}
+

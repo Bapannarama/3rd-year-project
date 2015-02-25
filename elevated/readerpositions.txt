@@ -1,0 +1,6 @@
+tip of reader antenna is 166cm of ground
+
+6,6 reader position is 7,7
+0,6 reader position is -1,7
+6,0 reader position is 7,-1
+0,0 reader position is -1,-1
