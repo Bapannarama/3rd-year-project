@@ -50,3 +50,16 @@ def fetch_data(dataset):
 					line = file.readline()
 
 	return strengths, times
+
+def isolate_reader_data(data, reader):
+	# this function takes in a 3D matrix of rssi data which has ALREADY
+	# BEEN AVERAGED and returns a 2D matrix corresponding to the rssi data
+	# from the reader specified by the 'reader' parameter
+
+	reader_data = [[0 for i in range(len(data))] for i in range(len(data[0]))]
+
+	for i in range(len(data)):
+		for j in range(len(data[i])):
+			reader_data[i][j] = data[i][j][reader]
+
+	return reader_data
