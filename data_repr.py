@@ -10,12 +10,24 @@ r_dir = ['/0,0/', '/0,6/', '/6,0/', '/6,6/']
 r_pos = [' (-1,-1) ', ' (-1,7) ', ' (7,-1) ', ' (7,7) ']
 
 
+def error_histogram(errors):
+	"""This function takes in a 2D array of error values which correspond to
+	   the difference between the actual position and the predicted position
+	   of the rssi reading by the location algorithm at each position on the
+	   floor grid. It then unravels it, and creates a histogram of them."""
+	matrix = np.asarray(errors)
+	errors_list = np.reshape(matrix, -1)
+	xbins = range(20)
+
+	plt.hist(errors_list)
+	plt.xlabel('Error margin (cm)')
+	plt.show()
+
+
 def diagonal_rssi(dataset, rssi):
 	diagonal_coordinate_names = []
-	diagonal_coordinate_names.append(
-		['0,0', '1,1', '2,2', '3,3', '4,4', '5,5', '6,6'])
-	diagonal_coordinate_names.append(
-		['6,0', '5,1', '4,2', '3,3', '2,4', '1,5', '0,6'])
+	diagonal_coordinate_names.append(['0,0', '1,1', '2,2', '3,3', '4,4', '5,5', '6,6'])
+	diagonal_coordinate_names.append(['6,0', '5,1', '4,2', '3,3', '2,4', '1,5', '0,6'])
 	diagonal_coordinate_names.append(diagonal_coordinate_names[1][::-1])
 	diagonal_coordinate_names.append(diagonal_coordinate_names[0][::-1])
 
@@ -23,27 +35,26 @@ def diagonal_rssi(dataset, rssi):
 
 	for r in range(len(diagonal_coordinate_names)):
 		values = []
-		reader_values = df.isolate_reader_data(rssi, r)
+		length = len(rssi) - 1
 
 		if r == 0:
-			for i in range(len(rssi)): # loops 7 times dw mate
-				values.append(reader_values[i][i])
-
+			for i in range(len(rssi)):
+				values.append(rssi[i][i][r])
 		elif r == 1:
 			for i in range(len(rssi)):
-				values.append(reader_values[len(reader_values) - i][i])
+				values.append(rssi[length - i][i][r])
 
 		elif r == 2:
 			for i in range(len(rssi)):
-				values.append(rssi[i][len(rssi) - i])
+				values.append(rssi[i][length - i][r])
 
 		elif r == 3:
 			for i in range(len(rssi)):
-				values.append(rssi[len(rssi) - i][len(rssi) - i])
+				values.append(rssi[length - i][length - i][r])
 
 		# create line of best fit coefficients, then create line itself
-		bf_c = np.polyfit(range(len(reader_values)), values, 1)
-		bf = [z * bf_c[0] + bf_c[1] for z in range(len(reader_values))]
+		bf_c = np.polyfit(range(len(rssi)), values, 1)
+		bf = [z * bf_c[0] + bf_c[1] for z in range(len(rssi))]
 
 		# plot raw data points
 		plt.plot(range(7), values, 'bo-')
@@ -57,8 +68,7 @@ def diagonal_rssi(dataset, rssi):
 
 		plt.xlabel('Diagonal Coordinates from Reader Location')
 		plt.ylabel('RSSI')
-		plt.title(
-			'RSSI Against Diagonal Coordinates from Reader at ' + r_pos[r])
+		plt.title('RSSI Against Diagonal Coordinates from Reader at ' + r_pos[r])
 
 		plt.savefig(dataset + r_dir[r] + 'diagonal.svg', format='svg')
 		plt.clf()
