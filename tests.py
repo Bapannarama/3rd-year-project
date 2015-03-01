@@ -10,6 +10,9 @@ def generate_errors_matrix(rssi, function):
 	parameter. This allows flexibility in which method is used to find position
 	estimates. The rssi parameter is expected to be averaged."""
 
+	# This function handles the looping of the interpolation function across all
+	# grid points.
+
 	errors = [[0 for x in range(len(rssi))] for x in range(len(rssi[0]))]
 
 	for i in range(len(rssi)):

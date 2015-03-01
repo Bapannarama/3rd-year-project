@@ -10,7 +10,11 @@ def dummy_test(rssi_vector):
 	coords = shep.shepard_interpolation(dummy_data, rssi_vector, 2)
 	print(coords)
 
+
 def generate_errors_matrix():
+	"""This  generate errors matrix function handles within it the loading of
+	the data, shepard interpolation operations, and the generation of the error
+	matrix"""
 	strengths = data_representation.setup_elevated()
 
 	test_database = strengths

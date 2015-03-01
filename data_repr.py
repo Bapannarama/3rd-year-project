@@ -74,14 +74,15 @@ def diagonal_rssi(dataset, rssi):
 		plt.clf()
 
 
-def errors_histogram(errors):
+def errors_histogram(dataset, errors):
 	matrix = np.asarray(errors)
 	errors_list = np.reshape(matrix, -1)
 	xbins = range(20)
 
 	plt.hist(errors_list, bins=xbins)
 	plt.xlabel('Error margin (cm)')
-	plt.show()
+	plt.savefig(dataset + "/errors_histogram.svg", format='svg')
+	plt.clf()
 
 
 def point_rssi_wrt_time(dataset, rssi, t):
@@ -112,7 +113,7 @@ def point_rssi_wrt_time(dataset, rssi, t):
 				plt.clf()
 
 
-def contour(dataset, rssi):
+def contour_plot(dataset, rssi):
 	rssi = df.rssi_average(rssi)
 
 	for r in range(len(rssi[0][0])):

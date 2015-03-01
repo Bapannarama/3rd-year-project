@@ -78,7 +78,10 @@ def nn_test():
 
 	return predicted_coordinates
 
+
 def generate_errors_matrix(predicted_coordinates):
+	"""This generate errors matrix function handles within it only the generation
+	of the errors based on the predicted coordinates at each position"""
 	dims = np.asarray(predicted_coordinates).shape
 	errors = [[0 for i in range(dims[0])] for j in range(dims[1])]
 

@@ -1,7 +1,6 @@
 __author__ = 'bapanna'
 
 import numpy as np
-import math
 
 
 def denominator(w):
