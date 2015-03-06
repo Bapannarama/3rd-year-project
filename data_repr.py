@@ -10,7 +10,7 @@ r_dir = ['/0,0/', '/0,6/', '/6,0/', '/6,6/']
 r_pos = [' (-1,-1) ', ' (-1,7) ', ' (7,-1) ', ' (7,7) ']
 
 
-def error_histogram(errors):
+def errors_histogram_show(errors):
 	"""This function takes in a 2D array of error values which correspond to
 	   the difference between the actual position and the predicted position
 	   of the rssi reading by the location algorithm at each position on the
@@ -21,6 +21,7 @@ def error_histogram(errors):
 
 	plt.hist(errors_list)
 	plt.xlabel('Error margin (cm)')
+	plt.title('Prediction Errors Frequency Distribution')
 	plt.show()
 
 
@@ -74,13 +75,14 @@ def diagonal_rssi(dataset, rssi):
 		plt.clf()
 
 
-def errors_histogram(dataset, errors):
+def errors_histogram_save(dataset, errors):
 	matrix = np.asarray(errors)
 	errors_list = np.reshape(matrix, -1)
 	xbins = range(20)
 
 	plt.hist(errors_list, bins=xbins)
 	plt.xlabel('Error margin (cm)')
+	plt.title('Prediction Errors Frequency Distribution')
 	plt.savefig(dataset + "/errors_histogram.svg", format='svg')
 	plt.clf()
 

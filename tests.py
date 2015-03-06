@@ -4,11 +4,15 @@ import data_fetch as df
 import data_repr as dr
 import numpy as np
 import shepard as sp
+import knn
 
-def generate_errors_matrix(rssi, function):
+
+def generate_errors_matrix(rssi, function, p=2, k=3):
 	"""This function has 'function' representing the interpolation scheme as a
 	parameter. This allows flexibility in which method is used to find position
 	estimates. The rssi parameter is expected to be averaged."""
+
+	# scheme to be used determined by value of 'function' variable
 
 	# This function handles the looping of the interpolation function across all
 	# grid points.
@@ -24,7 +28,15 @@ def generate_errors_matrix(rssi, function):
 			rssi[i][j] = [0, 0, 0, 0]
 
 			test_coordinate = np.asarray((i,j))
-			calc_coordinate = function(rssi, test_vector, 2)
+
+			if function == sp.shepard_interpolation:
+				calc_coordinate = function(rssi, test_vector, p)
+
+			elif function == knn.nn_classifier:
+				calc_coordinate = function(rssi, test_vector)
+
+			elif function == knn.knn_regressor:
+				calc_coordinate = knn.knn_regressor(rssi, test_vector, k)
 
 			calc_coordinate = np.asarray(calc_coordinate)
 			errors[i][j] = np.linalg.norm(test_coordinate - calc_coordinate) * 50
@@ -33,8 +45,10 @@ def generate_errors_matrix(rssi, function):
 
 	return errors
 
+
 dataset = 'elevated'
 s, t = df.fetch_data(dataset)
 s = df.rssi_average(s)
 func = sp.shepard_interpolation
 error_matrix = generate_errors_matrix(s, func)
+dr.errors_histogram_show(error_matrix)
