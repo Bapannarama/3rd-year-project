@@ -3,6 +3,7 @@ __author__ = 'bapanna'
 import numpy as np
 import math
 
+
 # OK
 def dummy_data():
 	# empty array filled with zeroes which will be populated properly later
@@ -18,6 +19,7 @@ def dummy_data():
 
 	return strengths
 
+
 # OK
 def rssi_average(strengths):
 	# input will be array of individual values
@@ -27,6 +29,9 @@ def rssi_average(strengths):
 				strengths[i][j][r] = np.median(strengths[i][j][r])
 
 	return strengths
+
+
+# implement calls to Kalman Filtering Library
 
 # OK
 def fetch_data(dataset):
@@ -50,6 +55,7 @@ def fetch_data(dataset):
 					line = file.readline()
 
 	return strengths, times
+
 
 def isolate_reader_data(data, reader):
 	# this function takes in a 3D matrix of rssi data which has ALREADY
