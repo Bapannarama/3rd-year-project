@@ -26,41 +26,41 @@ def euclidean_distance(r, s):
 	return np.linalg.norm(r - s)
 
 
-def calc_weights(database, rssi_vec, p):
-	w = [[0 for i in range(len(database))] for i in range(len(database[0]))]
+def calc_weights(fingerprint, rssi_vector, p):
+	w = [[0 for i in range(len(fingerprint))] for i in range(len(fingerprint[0]))]
 
-	for i in range(len(database)):
-		for j in range(len(database[i])):
+	for i in range(len(fingerprint)):
+		for j in range(len(fingerprint[i])):
 			# prevents division by zero when testing with zeroed vector from tests.py
-			if database[i][j][0] == 0:
+			if fingerprint[i][j][0] == 0:
 				w[i][j] = 0
 				continue
 
-			data_vector = database[i][j]
+			data_vector = fingerprint[i][j]
 
-			w[i][j] = euclidean_distance(data_vector, rssi_vec) ** -p
+			w[i][j] = euclidean_distance(data_vector, rssi_vector) ** -p
 
 	return w
 
 
 # checks if input vector corresponds to RSSIs of a known point
-def check_input_vector(database, vector):
-	for i, col in enumerate(database):
+def check_input_vector(fingerprint, rssi_vector):
+	for i, col in enumerate(fingerprint):
 		for j, strengths in enumerate(col):
-			if strengths == vector:
+			if strengths == rssi_vector:
 				return [i,j]
 
 	return False
 
 
 # rssi will be a list
-def shepard_interpolation(rssi_data, rssi_vector, power):
-	location = check_input_vector(rssi_data, rssi_vector)
+def shepard_interpolation(fingerprint, rssi_vector, power):
+	location = check_input_vector(fingerprint, rssi_vector)
 
 	if location:
 		return location
 
-	weights = calc_weights(rssi_data, rssi_vector, power)
+	weights = calc_weights(fingerprint, rssi_vector, power)
 	num = numerator(weights)
 	den = denominator(weights)
 

@@ -3,13 +3,13 @@ __author__ = 'bapanna'
 import shepard as sp
 
 
-def nn_classifier(rssi, vector):
-	errors = [[0 for i in range(len(rssi))] for i in range(len(rssi[0]))]
+def nn_classifier(fingerprint, rssi_vector):
+	errors = [[0 for i in range(len(fingerprint))] for i in range(len(fingerprint[0]))]
 
-	for i in range(len(rssi)):
-		for j in range(len(rssi[i])):
-			# calculates how far apart vector and the coordinate readings are
-			errors[i][j] = sp.euclidean_distance(vector, rssi[i][j])
+	for i in range(len(fingerprint)):
+		for j in range(len(fingerprint[i])):
+			# calculates how far apart rssi_vector and the coordinate readings are
+			errors[i][j] = sp.euclidean_distance(rssi_vector, fingerprint[i][j])
 
 	min_in_each_col = []
 
@@ -22,15 +22,15 @@ def nn_classifier(rssi, vector):
 	return [x_coord, y_coord]
 
 
-def knn_regressor(rssi, vector, k):
+def knn_regressor(fingerprint, rssi_vector, k):
 	# function needs to return an average of the k coordinates which are nearest
 	# in feature space
-	errors = [[0 for i in range(len(rssi))] for i in range(len(rssi[0]))]
+	errors = [[0 for i in range(len(fingerprint))] for i in range(len(fingerprint[0]))]
 
-	for i in range(len(rssi)):
-		for j in range(len(rssi[i])):
-			# calculates how far apart vector and the coordinate readings are
-			errors[i][j] = sp.euclidean_distance(vector, rssi[i][j])
+	for i in range(len(fingerprint)):
+		for j in range(len(fingerprint[i])):
+			# calculates how far apart rssi_vector and the coordinate readings are
+			errors[i][j] = sp.euclidean_distance(rssi_vector, fingerprint[i][j])
 
 	k_nearest = []
 
