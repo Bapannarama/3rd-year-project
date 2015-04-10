@@ -5,6 +5,7 @@ import data_repr as dr
 import numpy as np
 import shepard as sp
 import knn
+import kalman as km
 
 
 def generate_errors_matrix(fingerprint, function, p=2, k=3):
@@ -46,9 +47,6 @@ def generate_errors_matrix(fingerprint, function, p=2, k=3):
 	return errors
 
 
-dataset = 'elevated'
-s, t = df.fetch_fingerprint(dataset)
-s = df.rssi_average(s)
-func = sp.shepard_interpolation
-error_matrix = generate_errors_matrix(s, func)
-dr.errors_histogram_show(error_matrix)
+data = [52, 50, 53, 53, 53, 53, 52, 53, 52, 52]
+prediction = km.multivariate_kalman(data)
+print(prediction)

@@ -12,7 +12,7 @@ import statistics
 def univariate_kalman(rssi_data):
 	"""The following function is used to settle on a value for each point for
 	the initial radio map readings. This is intended to be a replacement or
-	alternative to the rssi_average() function in the data_fetch module.
+	alternative to the fingerprint_average() function in the data_fetch module.
 
 	**Parameters**
 	rssi_data:1xn list
@@ -81,7 +81,7 @@ def multivariate_kalman(reader_data, fingerprint):
 	fingerprint: 7x7 list
 		This is the matrix which contains standard RSSI values for each point in
 		the grid. Each point should be a single value and is assumed to have
-		been calculated using the rssi_average() or univariate_kalman()
+		been calculated using the fingerprint_average() or univariate_kalman()
 		functions.
 	"""
 

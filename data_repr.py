@@ -32,7 +32,7 @@ def diagonal_rssi(dataset, rssi):
 	diagonal_coordinate_names.append(diagonal_coordinate_names[1][::-1])
 	diagonal_coordinate_names.append(diagonal_coordinate_names[0][::-1])
 
-	rssi = df.rssi_average(rssi)
+	rssi = df.fingerprint_average(rssi)
 
 	for r in range(len(diagonal_coordinate_names)):
 		values = []
@@ -116,7 +116,7 @@ def point_rssi_wrt_time(dataset, rssi, t):
 
 
 def contour_plot(dataset, rssi):
-	rssi = df.rssi_average(rssi)
+	rssi = df.fingerprint_average(rssi)
 
 	for r in range(len(rssi[0][0])):
 		reader_data = df.isolate_reader_data(rssi, r)

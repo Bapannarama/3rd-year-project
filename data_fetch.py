@@ -1,10 +1,9 @@
 __author__ = 'bapanna'
 
 import numpy as np
-import math
+import math, statistics
 
 
-# OK
 def dummy_data():
 	# empty array filled with zeroes which will be populated properly later
 	strengths = [[[0 for i in range(4)] for i in range(7)] for i in range(7)]
@@ -20,8 +19,7 @@ def dummy_data():
 	return strengths
 
 
-# OK
-def rssi_average(strengths):
+def fingerprint_average(strengths):
 	# input will be array of individual values
 	for i in range(len(strengths)): # 7
 		for j in range(len(strengths[i])): # 7
@@ -31,14 +29,30 @@ def rssi_average(strengths):
 	return strengths
 
 
-def convert_trajectories_form(traj):
-	new_traj = [[[[] for i in range(4)] for i in range(10)] for i in range(2)]
+def trajectory_average(t):
+	"""
+	finds the meadian for each data point of each reader across the three test values
+	"""
 
-	for d in range(len(new_traj)):
-		for p in range(len(new_traj[d])):
-			for r in range(len(new_traj[d][p])):
-				for t in range(len(traj[d][r])):
-					new_traj[d][p][r].append(traj[d][r][t][p])
+	for p in range(len(t)):
+		for pt in range(len(t[p])):
+			for r in range(len(t[p][pt])):
+				t[p][pt][r] = statistics.median(t[p][pt][r])
+
+	return t
+
+
+def convert_trajectories_form(traj):
+	new_traj = [[[[0,0,0] for i in range(4)] for i in range(10)] for i in range(2)]
+
+	# we want to collect all the test results for a particular point from a reader
+	# collecting info from traj
+
+	for paths in range(len(traj)): # 2
+		for readers in range(len(traj[paths])): # 4
+			for test in range(len(traj[paths][readers])): # 3
+				for point in range(len(traj[paths][readers][test])): # 10
+					new_traj[paths][point][readers][test] = traj[paths][readers][test][point]
 
 	return new_traj
 
@@ -70,13 +84,11 @@ def fetch_diagonals():
 
 	# trajectories is current in format [path][reader][test][point]
 	# we want it in form [path][point][reader][test]
-
 	trajectories = convert_trajectories_form(trajectories)
 
 	return trajectories
 
 
-# OK
 def fetch_fingerprint(dataset):
 	# dataset will be name of directory containing data
 	reader_dir = ['/0,0/', '/0,6/', '/6,0/', '/6,6/']
