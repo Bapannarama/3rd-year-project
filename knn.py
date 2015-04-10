@@ -22,7 +22,10 @@ def nn_classifier(fingerprint, rssi_vector):
 	return [x_coord, y_coord]
 
 
-def knn_regressor(fingerprint, rssi_vector, k):
+def knn_regressor(fingerprint, rssi_vector, k=1):
+	"""
+	This function takes in the fingerprint, a value for k and and an rssi vector of length 4 (each value is the value from each reader)
+	"""
 	# function needs to return an average of the k coordinates which are nearest
 	# in feature space
 	errors = [[0 for i in range(len(fingerprint))] for i in range(len(fingerprint[0]))]

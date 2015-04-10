@@ -47,7 +47,7 @@ def generate_errors_matrix(fingerprint, function, p=2, k=3):
 
 
 dataset = 'elevated'
-s, t = df.fetch_data(dataset)
+s, t = df.fetch_fingerprint(dataset)
 s = df.rssi_average(s)
 func = sp.shepard_interpolation
 error_matrix = generate_errors_matrix(s, func)

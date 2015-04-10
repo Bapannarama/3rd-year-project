@@ -8,6 +8,7 @@ import statistics
 # Functions written with the help of the example written as part of the library
 # documentation https://filterpy.readthedocs.org/en/latest/kalman/KalmanFilter.html
 
+
 def univariate_kalman(rssi_data):
 	"""The following function is used to settle on a value for each point for
 	the initial radio map readings. This is intended to be a replacement or
@@ -67,7 +68,8 @@ def univariate_kalman(rssi_data):
 
 
 def multivariate_kalman(reader_data, fingerprint):
-	"""This function will be responsible for finding the trajectory of the
+	"""
+	This function will be responsible for finding the trajectory of the
 	reader given the reader's returned rssi values and the matrix containing the
 	area's default values.
 
@@ -80,7 +82,8 @@ def multivariate_kalman(reader_data, fingerprint):
 		This is the matrix which contains standard RSSI values for each point in
 		the grid. Each point should be a single value and is assumed to have
 		been calculated using the rssi_average() or univariate_kalman()
-		functions."""
+		functions.
+	"""
 
 	# Calculate the sample standard deviation of the rssi_data so for the
 	# measurement noise value.
@@ -101,7 +104,8 @@ def multivariate_kalman(reader_data, fingerprint):
 	# Talk about hackiness of adding another time period into measurements!!!!!
 	reader.x = np.array([[3, 3, 3, 3]])
 
-	"""The state transition matrix describes the calculation which needs to be
+	"""
+	The state transition matrix describes the calculation which needs to be
 	carried out on the state variable in order to obtain the predicted state
 	variables.
 
@@ -117,7 +121,8 @@ def multivariate_kalman(reader_data, fingerprint):
 
 	In our case, the matrix must calculate in which direction the reader is
 	going and extrapolate from there. For simplicity's sake, the previous
-	direction of travel could be taken as the foundation for the prediction."""
+	direction of travel could be taken as the foundation for the prediction.
+	"""
 
 	# State transition matrix - "transformation of the state matrix" must be
 	# carried out.
@@ -131,13 +136,15 @@ def multivariate_kalman(reader_data, fingerprint):
 
 	# Motion function not needed ('Bu' term in book).
 
-	"""In the book example, a measurement function was not needed as the
+	"""
+	In the book example, a measurement function was not needed as the
 	residual was in the same units as the measured quantity - the entire process
 	took place in the same feature space (distance). In this case, the feature
 	space is the measurement space, so RSSI. However, we cannot convert from
 	position to RSSI just as we cannot convert from RSSI to position yet -
 	the process is not deterministic and gains accuracy as the dataset grows
-	larger."""
+	larger.
+	"""
 
 	# Measurement function matrix. This is used to calculate the residual.
 	# This is used by the object to convert from coordinates → RSSI
