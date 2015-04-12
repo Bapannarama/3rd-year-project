@@ -170,8 +170,3 @@ def multivariate_kalman(reader_data, fingerprint):
 		positions[i] = reader.x
 
 	return positions
-
-
-data = [52, 50, 53, 53, 53, 53, 52, 53, 52, 52]
-prediction = multivariate_kalman(data)
-print(prediction)

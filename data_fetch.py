@@ -1,6 +1,7 @@
 __author__ = 'bapanna'
 
 import numpy as np
+import kalman as km
 import math, statistics
 
 
@@ -25,6 +26,16 @@ def fingerprint_average(strengths):
 		for j in range(len(strengths[i])): # 7
 			for r in range(len(strengths[i][j])): # 4
 				strengths[i][j][r] = np.median(strengths[i][j][r])
+
+	return strengths
+
+
+def fingerprint_kalman(strengths):
+	# input will be array of individual values
+	for i in range(len(strengths)): # 7
+		for j in range(len(strengths[i])): # 7
+			for r in range(len(strengths[i][j])): # 4
+				strengths[i][j][r] = km.univariate_kalman(strengths[i][j][r])
 
 	return strengths
 
@@ -90,6 +101,10 @@ def fetch_diagonals():
 
 
 def fetch_fingerprint(dataset):
+	"""
+	:param dataset: name of the folder which the fingerprint data is stored in
+	:return: a matrix of the form fingerprint[x][y][reader][rssi_across_time]
+	"""
 	# dataset will be name of directory containing data
 	reader_dir = ['/0,0/', '/0,6/', '/6,0/', '/6,6/']
 

@@ -132,3 +132,30 @@ def contour_plot(dataset, rssi):
 		plt.ylabel('y Position')
 		plt.savefig(dataset + r_dir[r] + 'contour.svg', format='svg')
 		plt.clf()
+
+
+def trajectory_mse(predicted_path, path_type):
+	actual_path = []
+	if path_type.lower() == "parallel":
+		actual_path = [[6-i*(0.7), 6-i*(0.7)] for i in range(10)]
+	elif path_type.lower() == "perpendicular":
+		actual_path = [[i*0.7, 6-i*0.7] for i in range(10)]
+
+	mse = [(np.linalg.norm(np.array(pp) - np.array(ap)) * 50) for pp, ap in zip(predicted_path, actual_path)]
+
+	bf_c = np.polyfit(range(len(predicted_path)), mse, 1)
+	bf = [z * bf_c[0] + bf_c[1] for z in range(len(predicted_path))]
+
+	# plot raw data points
+	plt.plot(range(10), mse, 'bo-')
+
+	# plot regression line
+	plt.plot(range(10), bf, 'r--')
+
+	plt.xlabel('Data Point')
+	plt.ylabel('MSE (cm)')
+	plt.title('Mean Squared Error At Each Point Along Trajectory')
+
+	plt.savefig('diagonals/Trajectory MSE.svg', format='svg')
+	plt.show()
+	plt.clf()

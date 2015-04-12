@@ -45,8 +45,3 @@ def generate_errors_matrix(fingerprint, function, p=2, k=3):
 			fingerprint[i][j] = test_vector
 
 	return errors
-
-
-data = [52, 50, 53, 53, 53, 53, 52, 53, 52, 52]
-prediction = km.multivariate_kalman(data)
-print(prediction)
