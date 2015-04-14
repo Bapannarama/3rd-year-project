@@ -23,6 +23,7 @@ def errors_histogram_show(errors):
 	plt.xlabel('Error margin (cm)')
 	plt.title('Prediction Errors Frequency Distribution')
 	plt.show()
+	plt.clf()
 
 
 def diagonal_rssi(dataset, rssi):
@@ -80,7 +81,7 @@ def errors_histogram_save(dataset, errors, k):
 	errors_list = np.reshape(matrix, -1)
 	xbins = range(20)
 
-	plt.hist(errors_list, bins=xbins)
+	plt.hist(errors_list)
 	plt.xlabel('Error margin (cm)')
 	plt.title('Prediction Errors Frequency Distribution')
 	plt.savefig("{}/{}_errors_histogram.svg".format(dataset, str(k)), format='svg')

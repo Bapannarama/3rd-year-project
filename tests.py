@@ -6,6 +6,7 @@ import numpy as np
 import shepard as sp
 import knn
 import kalman as km
+import matplotlib.pyplot as plt
 
 
 def generate_errors_matrix(fingerprint, function, p=2, k=3):
@@ -47,11 +48,28 @@ def generate_errors_matrix(fingerprint, function, p=2, k=3):
 	# returns a 7*7 matrix containing prediction MSE for that position in cm
 	return errors
 
-strengths, times = df.fetch_fingerprint("elevated")
+
+dataset = "reader_ground_level"
+strengths, times = df.fetch_fingerprint(dataset)
 fingerprint = df.fingerprint_average(strengths)
 
-for i in range(1,50):
-	errors = generate_errors_matrix(fingerprint, knn.knn_regressor, k=i)
-	print(np.array(errors).mean())
+mse = []
 
-	# dr.errors_histogram_show(errors)
+for i in range(1,50):
+	errors = generate_errors_matrix(fingerprint, sp.shepard_interpolation, p=i)
+	print(np.array(errors).mean())
+	mse.append(np.array(errors).mean())
+	dr.errors_histogram_save(dataset, errors, i)
+
+plt.plot(range(1,50), mse, 'bo-')
+plt.axhline(y=120)
+plt.xlabel("k")
+plt.ylabel("Mean Squared Error (cm²)")
+plt.title("Mean Squared Error vs. k (KNN)")
+plt.savefig("{}/knn k errors.svg".format(dataset), format='svg')
+
+# elevated best knn error: k=11 @ 130.069211329
+# elevated best shepard error: p=3 @ 122.511396273
+
+# reader_ground best shepard error: p=1 @ 136.177528736
+# reader_ground best knn error: k=49 @ 132.624796737
