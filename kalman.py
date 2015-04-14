@@ -67,7 +67,7 @@ def univariate_kalman(rssi_data):
 	return reader.x
 
 
-def multivariate_kalman(reader_data, fingerprint):
+def multivariate_kalman_old(reader_data, fingerprint):
 	"""
 	This function will be responsible for finding the trajectory of the
 	reader given the reader's returned rssi values and the matrix containing the
@@ -170,3 +170,67 @@ def multivariate_kalman(reader_data, fingerprint):
 		positions[i] = reader.x
 
 	return positions
+
+
+def multivariate_kalman(coordinates_matrix, fingerprint):
+	"""
+	:param coordinates_matrix: 2*10 matrix of x-y coordinates from the trajectory
+	:param fingerprint: 7*7 matrix of RSSI values
+	:return: 2*10 matrix of filtered coordinate pairs
+	"""
+
+	reader = kalman.KalmanFilter(dim_x=4, dim_z=2)
+
+	# STATE VARIABLE
+	# will be of format [x,y,v_x,v_y]
+	# velocity is the unobserved variable
+	reader.x = np.array([[0, 0, 0, 0]])
+
+	# STATE TRANSITION MATRIX
+	# time difference between measurements is assumed to be 3 seconds
+	reader.F = np.array([[1, 0, 3, 0],
+						 [0, 1, 0, 3],
+						 [0, 0, 1, 0],
+						 [0, 0, 0, 1]])
+
+	# MEASUREMENT MATRIX
+	"""
+	The measurement function converts from state variable units. As we do not
+	want to convert units until the very end of the filtering, this will not
+	change x and y. The shape is derived from z = Hx.
+	"""
+	reader.H = np.array([[1, 0, 0, 0],
+						 [0, 1, 0, 0]])
+
+	# using sample variance
+	x_var = statistics.variance([p[0] for p in coordinates_matrix])
+	y_var = statistics.variance([p[1] for p in coordinates_matrix])
+	# MEASUREMENT NOISE
+	# assume no covariance - another naïve assumption
+	reader.R = np.array([[x_var, 0],
+						 [0, y_var]])
+
+	# PROCESS NOISE - this is a complete guess
+	reader.Q = np.array([[0.5, 0, 0, 0],
+						 [0, 0.5, 0, 0],
+						 [0, 0, 0.5, 0],
+						 [0, 0, 0, 0, 5]])
+
+	# COVARIANCE MATRIX
+	reader.P = np.array([[1000, 0, 0, 0],
+						 [0, 1000, 0, 0],
+						 [0, 0, 1000, 0],
+						 [0, 0, 0, 1000]])
+
+	positions = []
+	for point in coordinates_matrix:
+		reader.predict()
+		reader.update(np.array(point).T)
+
+		positions.append([reader.x[0], reader.x[1]])
+
+	return positions
+
+
+def rssi_to_trajectory(fingerprint, k=1, ):
+	pass

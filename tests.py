@@ -44,4 +44,14 @@ def generate_errors_matrix(fingerprint, function, p=2, k=3):
 
 			fingerprint[i][j] = test_vector
 
+	# returns a 7*7 matrix containing prediction MSE for that position in cm
 	return errors
+
+strengths, times = df.fetch_fingerprint("elevated")
+fingerprint = df.fingerprint_average(strengths)
+
+for i in range(1,50):
+	errors = generate_errors_matrix(fingerprint, knn.knn_regressor, k=i)
+	print(np.array(errors).mean())
+
+	# dr.errors_histogram_show(errors)

@@ -75,7 +75,7 @@ def diagonal_rssi(dataset, rssi):
 		plt.clf()
 
 
-def errors_histogram_save(dataset, errors):
+def errors_histogram_save(dataset, errors, k):
 	matrix = np.asarray(errors)
 	errors_list = np.reshape(matrix, -1)
 	xbins = range(20)
@@ -83,7 +83,7 @@ def errors_histogram_save(dataset, errors):
 	plt.hist(errors_list, bins=xbins)
 	plt.xlabel('Error margin (cm)')
 	plt.title('Prediction Errors Frequency Distribution')
-	plt.savefig(dataset + "/errors_histogram.svg", format='svg')
+	plt.savefig("{}/{}_errors_histogram.svg".format(dataset, str(k)), format='svg')
 	plt.clf()
 
 
@@ -159,3 +159,18 @@ def trajectory_mse(predicted_path, path_type):
 	plt.savefig('diagonals/Trajectory MSE.svg', format='svg')
 	plt.show()
 	plt.clf()
+
+
+def trajectory_overlay(predicted_path, path_type):
+	actual_path = []
+	if path_type.lower() == "parallel":
+		actual_path = [[6 - i * (0.7), 6 - i * (0.7)] for i in range(10)]
+	elif path_type.lower() == "perpendicular":
+		actual_path = [[i * 0.7, 6 - i * 0.7] for i in range(10)]
+
+	# line plotted depends on order of values in x list rather than magnitude -
+	# this is good for plotting a trajectory
+	plt.plot([p[0] for p in predicted_path], [p[1] for p in predicted_path], 'bo-')
+	plt.plot([p[0] for p in actual_path], [p[1] for p in actual_path], 'ro-')
+
+	plt.show()
