@@ -3,6 +3,8 @@ __author__ = 'bapanna'
 from filterpy import kalman
 from filterpy.common import Q_discrete_white_noise
 import numpy as np
+import shepard as sp
+import knn
 import statistics
 
 # Functions written with the help of the example written as part of the library
@@ -172,7 +174,7 @@ def multivariate_kalman_old(reader_data, fingerprint):
 	return positions
 
 
-def multivariate_kalman(coordinates_matrix, fingerprint):
+def multivariate_kalman(coordinates_matrix):
 	"""
 	:param coordinates_matrix: 2*10 matrix of x-y coordinates from the trajectory
 	:param fingerprint: 7*7 matrix of RSSI values
@@ -184,7 +186,7 @@ def multivariate_kalman(coordinates_matrix, fingerprint):
 	# STATE VARIABLE
 	# will be of format [x,y,v_x,v_y]
 	# velocity is the unobserved variable
-	reader.x = np.array([[0, 0, 0, 0]])
+	reader.x = np.array([[3, 3, 0, 0]]).T
 
 	# STATE TRANSITION MATRIX
 	# time difference between measurements is assumed to be 3 seconds
@@ -214,23 +216,45 @@ def multivariate_kalman(coordinates_matrix, fingerprint):
 	reader.Q = np.array([[0.5, 0, 0, 0],
 						 [0, 0.5, 0, 0],
 						 [0, 0, 0.5, 0],
-						 [0, 0, 0, 0, 5]])
+						 [0, 0, 0, 0.5]])
 
 	# COVARIANCE MATRIX
-	reader.P = np.array([[1000, 0, 0, 0],
-						 [0, 1000, 0, 0],
-						 [0, 0, 1000, 0],
-						 [0, 0, 0, 1000]])
+	reader.P = np.array([[500, 0, 0, 0],
+						 [0, 500, 0, 0],
+						 [0, 0, 500, 0],
+						 [0, 0, 0, 500]])
 
 	positions = []
 	for point in coordinates_matrix:
 		reader.predict()
 		reader.update(np.array(point).T)
 
-		positions.append([reader.x[0], reader.x[1]])
+		"""
+		reader.x[0] contains the original xy coordinates passed in
+		"""
+		positions.append(reader.x[0])
 
+	print(np.array(positions))
 	return positions
 
 
-def rssi_to_trajectory(fingerprint, k=1, ):
-	pass
+def rssi_to_coordinates(fingerprint, trajectory, function, p=3, k=11):
+	"""
+	:param fingerprint: 7*7 matrix containing rssi values for each point in the grid
+	:param trajectory: list of length 10 containing a series of rssi values (having already been averaged)
+	:param function: method of coordinate calculation (knn/shepard)
+	:param p: value for p
+	:param k: value for k
+	:return: 2*10 vector containing coordinate pairs for each rssi value
+	"""
+	coordinate_trajectory = [[0,0] for i in range(len(trajectory))]
+
+	if function == sp.shepard_interpolation:
+		for i, rssi_vector in enumerate(trajectory):
+			coordinate_trajectory[i] = function(fingerprint, rssi_vector, p)
+
+	elif function == knn.knn_regressor:
+		for i, rssi_vector in enumerate(trajectory):
+			coordinate_trajectory[i] = function(fingerprint, rssi_vector, k)
+
+	return coordinate_trajectory

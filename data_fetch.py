@@ -1,11 +1,16 @@
 __author__ = 'bapanna'
 
 import numpy as np
-import kalman as km
-import math, statistics
+import math
+import statistics
 
 
 def dummy_data():
+	"""
+	:return: 7*7*4 matrix containing dummy rssi values which are inversely
+	proportional to the distance from each reader
+	"""
+
 	# empty array filled with zeroes which will be populated properly later
 	strengths = [[[0 for i in range(4)] for i in range(7)] for i in range(7)]
 
@@ -21,6 +26,12 @@ def dummy_data():
 
 
 def fingerprint_average(strengths):
+	"""
+	:param strengths: 7*7*4*10 matrix containing rssi values from each reader
+	over 30s
+	:return: 7*7*4 matrix of rssi data for each point from each reader
+	"""
+
 	# input will be array of individual values
 	for i in range(len(strengths)): # 7
 		for j in range(len(strengths[i])): # 7
@@ -31,6 +42,11 @@ def fingerprint_average(strengths):
 
 
 def fingerprint_kalman(strengths):
+	"""
+	:param strengths: 7*7*4*10 matrix containing rssi values from each reader
+	over 30s
+	:return: 7*7*4 matrix of rssi data for each point from each reader
+	"""
 	# input will be array of individual values
 	for i in range(len(strengths)): # 7
 		for j in range(len(strengths[i])): # 7
@@ -42,22 +58,29 @@ def fingerprint_kalman(strengths):
 
 def trajectory_average(t):
 	"""
-	finds the meadian for each data point of each reader across the three test values
+	:param t: trajectory list which has been processed by convert_trajectories_form
+	:return: trajectory list which has had its three trials averaged (median)
+			 into one reading for each point.
 	"""
 
-	for p in range(len(t)):
-		for pt in range(len(t[p])):
-			for r in range(len(t[p][pt])):
+	for p in range(len(t)): # path
+		for pt in range(len(t[p])): # point
+			for r in range(len(t[p][pt])): # reader
 				t[p][pt][r] = statistics.median(t[p][pt][r])
 
 	return t
 
 
 def convert_trajectories_form(traj):
+	"""
+	:param traj: 2*4*3*10 list of raw rssi values
+	:return: 2*10*4*3 list of raw rssi values
+	"""
+
 	new_traj = [[[[0,0,0] for i in range(4)] for i in range(10)] for i in range(2)]
 
 	# we want to collect all the test results for a particular point from a reader
-	# collecting info from traj
+	# collecting info from trajectory
 
 	for paths in range(len(traj)): # 2
 		for readers in range(len(traj[paths])): # 4
@@ -70,8 +93,7 @@ def convert_trajectories_form(traj):
 
 def fetch_diagonals():
 	"""
-	Function fetches information on diagonals trajectory tests and stores in a
-	list
+	:return: returns a 2*4*3*10 list containing rssi data of trajectory trial
 	"""
 
 	# path to location where data for trajectory tests are contained
@@ -128,6 +150,13 @@ def fetch_fingerprint(dataset):
 
 
 def isolate_reader_data(data, reader):
+	"""
+	:param data: 7*7*4 list containing rssi data at every point for each reader
+	:param reader: integer corresponding to reader [0,1,2,3 =
+	[(-1,-1), (7,-1), (-1,7), (7,7)]
+	:return: 7*7 matrix of rssi data from a single reader
+	"""
+
 	# this function takes in a 3D matrix of rssi data which has ALREADY
 	# BEEN AVERAGED and returns a 2D matrix corresponding to the rssi data
 	# from the reader specified by the 'reader' parameter

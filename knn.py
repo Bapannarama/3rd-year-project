@@ -4,6 +4,13 @@ import shepard as sp
 
 
 def nn_classifier(fingerprint, rssi_vector):
+	"""
+	:param fingerprint: 7*7*4 list of reference rssi data
+	:param rssi_vector: list of length 4 for a particular point with rssi
+	readings from each reader
+	:return: an xy coordinate pair (list) of the most similar point in the grid
+	"""
+
 	errors = [[0 for i in range(len(fingerprint))] for i in range(len(fingerprint[0]))]
 
 	for i in range(len(fingerprint)):
@@ -22,9 +29,10 @@ def nn_classifier(fingerprint, rssi_vector):
 	return [x_coord, y_coord]
 
 
-def knn_regressor(fingerprint, rssi_vector, k=1):
+def knn_regressor(fingerprint, rssi_vector, k=11):
 	"""
-	This function takes in the fingerprint, a value for k and and an rssi vector of length 4 (each value is the value from each reader)
+	This function takes in the fingerprint, a value for k and and an rssi vector
+	of length 4 (each value is the value from each reader)
 	"""
 	# function needs to return an average of the k coordinates which are nearest
 	# in feature space

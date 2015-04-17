@@ -1,12 +1,10 @@
 __author__ = 'bapanna'
 
-import data_fetch as df
-import data_repr as dr
 import knn
-import numpy as np
 import shepard as sp
 
-def weighted_prediction(path, fingerprint, direction, w=0.5):
+
+def weighted_prediction(path, fingerprint, direction, function = knn.knn_regressor, w=0.5):
 	"""
 	:param path: a 10*4 matrix which contains the RSSI values taken
 	over the trajectory
@@ -26,10 +24,10 @@ def weighted_prediction(path, fingerprint, direction, w=0.5):
 
 	# this line adds the second point to the trajectory matrix - allows the
 	# predictor which assumes constant movement to function
-	trajectory.append(knn.nn_classifier(fingerprint, path[1]))
+	trajectory.append(function(fingerprint, path[1]))
 
-	for i in range(1,10):
-		nn_prediction = knn.nn_classifier(fingerprint, path[i])
+	for i in range(1,9):
+		nn_prediction = function(fingerprint, path[i])
 		# predicts next position based on previous step's movement
 		const_movement_prediction = [(2 * p_1 - p_0) for p_1, p_0 in zip(trajectory[i], trajectory[i - 1])]
 		final_prediction = [(w*k + (1-w)*c) for k,c in zip(nn_prediction, const_movement_prediction)]
@@ -37,10 +35,10 @@ def weighted_prediction(path, fingerprint, direction, w=0.5):
 
 	return trajectory
 
-strengths, times = df.fetch_fingerprint('elevated')
-fingerprint = df.fingerprint_kalman(strengths)
-t = df.fetch_diagonals()
-parallel, perpendicular = df.trajectory_average(t)
-parallel_path = weighted_prediction(parallel, fingerprint, "parallel", 3)
-print(parallel_path)
-# dr.trajectory_mse(parallel_path, "parallel")
+"""
+Best weight values:
+parallel shepard = 0.5
+parallel knn = 0.5
+perpendicular shepard = 0.5
+perpendicular knn = 0.5
+"""
